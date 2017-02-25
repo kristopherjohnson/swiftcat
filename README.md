@@ -1,11 +1,11 @@
 swiftcat
 ========
 
-`swiftcat` is a simple re-implementation of the venerable UNIX [cat](https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/cat.1.html) utility in Swift.
+`swiftcat` is a simple re-implementation of the venerable UNIX [cat(1)](https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/cat.1.html) utility in Swift.
 
 As such, it is no more useful than your system's built-in `cat`, but I did this as an exercise in writing some reusable Swift code for parsing command-line options and traversing files.
 
-It is mostly compatible with the built-in `cat`, so you can `alias cat=swiftcat` and be pretty happy with it. But `swiftcat` does not implement the `-s` or `-u` options, and its output of non-printing characters does not exactly match that of `cat`.
+It is mostly compatible with the built-in `cat`, so you can `alias cat=swiftcat` and be pretty happy with it. But `swiftcat` does not implement the `-s` or `-u` options, and its output of non-printing characters does not exactly match that of `cat`. It also currently does not support reading from standard input when a `-` is specified on the command line like `cat` does.
 
 Building swiftcat
 -----------------
