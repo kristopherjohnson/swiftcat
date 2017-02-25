@@ -27,7 +27,7 @@ enum AppError: Error, CustomStringConvertible {
 
 /// Display a brief usage message to standard error.
 func showUsage() {
-    print("usage: swiftcat [-behnstvx] [file ...]", to: &stderr)
+    print("usage: swiftcat [-behntvx] [file ...]", to: &stderr)
 }
 
 /// Display information for command-line options to standard error.
