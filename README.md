@@ -28,7 +28,6 @@ options:
 -e, --display-eol              Display non-printing characters and a dollar sign ('$') at the end of each line.
 -h, --help                     Show this help message.
 -n, --line-numbers             Number the output lines, starting at 1.
--s, --single-spaced            Squeeze multiple adjacent empty lines, causing the output to be single spaced.
 -t, --display-tabs             Display non-printing characters, and display tab characters as '^I'.
 -v, --display-nonprinting      Display non-printing characters so they are visible.
 -x, --display-hex              Display non-printing characters in hexadecimal notation.
