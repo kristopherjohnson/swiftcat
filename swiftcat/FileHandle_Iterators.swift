@@ -40,17 +40,33 @@ extension FileHandle {
 
 /// An iterator over the bytes read from a FileHandle.
 public struct FileHandleByteIterator: IteratorProtocol, Sequence {
-    let fileHandle: FileHandle
+    let blockIterator: FileHandleBlockIterator
+    var block: Data?
+    var dataIterator: Data.Iterator?
 
     public init(fileHandle: FileHandle) {
-        self.fileHandle = fileHandle
+        self.blockIterator = fileHandle.blocks(ofLength: 4096)
+        self.block = nil
+        self.dataIterator = nil
     }
 
     /// Read next byte.
     ///
     /// - returns: Byte, or nil if at end of file.
-    public func next() -> UInt8? {
-        return fileHandle.readData(ofLength: 1).first
+    public mutating func next() -> UInt8? {
+        if dataIterator != nil {
+            if let byte = dataIterator!.next() {
+                return byte
+            }
+        }
+
+        if let nextBlock = blockIterator.next() {
+            block = nextBlock
+            dataIterator = block!.makeIterator()
+            return dataIterator!.next()
+        }
+
+        return nil
     }
 }
 
@@ -59,7 +75,7 @@ public struct FileHandleByteIterator: IteratorProtocol, Sequence {
 /// A "line" is a sequence of bytes ending with a LF byte or specified byte value.
 /// Each returned line includes the delimiter, unless end-of-file was reached.
 public struct FileHandleLineIterator: IteratorProtocol, Sequence {
-    let fileHandle: FileHandle
+    var byteIterator: FileHandleByteIterator
     let delimiter: UInt8
 
     /// Constructor
@@ -67,38 +83,31 @@ public struct FileHandleLineIterator: IteratorProtocol, Sequence {
     /// - parameter fileHandle: Open file handle.
     /// - parameter delimiter: Byte value that marks end of line.
     public init(fileHandle: FileHandle, delimiter: UInt8 = 0x0a) {
-        self.fileHandle = fileHandle
+        self.byteIterator = fileHandle.bytes()
         self.delimiter = delimiter
     }
 
     /// Read next line from file.
     ///
     /// - returns: Next line, or nil if at end of file.
-    public func next() -> Data? {
-        var readBuffer = readOneByte()
-        if readBuffer.count == 0 {
+    public mutating func next() -> Data? {
+        var byte = byteIterator.next()
+        if byte == nil {
             return nil
         }
-        var lineData = readBuffer
-        var byte = readBuffer.first!
+
+        var lineData = Data()
+        lineData.append(byte!)
+
         while byte != delimiter {
-            readBuffer = readOneByte()
-            if readBuffer.count == 0 {
+            byte = byteIterator.next()
+            if byte == nil {
                 break
             }
-            lineData.append(readBuffer)
-            byte = readBuffer.first!
+            lineData.append(byte!)
         }
-        return lineData
-    }
 
-    /// Read next byte.
-    ///
-    /// - returns: Data containing one byte, or empty Data if at end of file.
-    ///
-    /// - TODO: This implementation uses `FileHandle.readData(ofLength: 1)` to read a byte at a time. There may be more performant ways to read the data.
-    private func readOneByte() -> Data {
-        return fileHandle.readData(ofLength: 1)
+        return lineData
     }
 }
 
@@ -120,7 +129,7 @@ public struct FileHandleBlockIterator: IteratorProtocol, Sequence {
 
     /// Read next block.
     ///
-    /// - returns: Data, or nil if at end of file.
+    /// - returns: `Data`, or `nil` if at end of file.
     public func next() -> Data? {
         var block = fileHandle.readData(ofLength: bytesPerBlock)
         if block.count == bytesPerBlock {
