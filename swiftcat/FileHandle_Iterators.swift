@@ -11,19 +11,19 @@ extension FileHandle {
 
     /// Return an iterator over the bytes in the file.
     ///
-    /// - returns: An iterator for UInt8 elements.
+    /// - returns: An iterator for `UInt8` elements.
     public func bytes() -> FileHandleByteIterator {
         return FileHandleByteIterator(fileHandle: self)
     }
 
     /// Return an iterator over the lines in the file.
     ///
-    /// A "line" is a String ending in "\n" or the specified delimiter,
+    /// A "line" is a sequence of bytes ending in "\n" or the specified delimiter,
     /// unless at the end of file.
     ///
     /// - parameter delimiter: Byte value that marks end of line. Defaults to LF.
     ///
-    /// - returns: An iterator for Strings.
+    /// - returns: An iterator for `Data` elements.
     public func lines(delimiter: UInt8 = 0x0a) -> FileHandleLineIterator {
         return FileHandleLineIterator(fileHandle: self, delimiter: delimiter)
     }
@@ -32,7 +32,7 @@ extension FileHandle {
     ///
     /// - parameter bytesPerBlock: Length of each block.
     ///
-    /// - returns: An iterator for Data elements.
+    /// - returns: An iterator for `Data` elements.
     public func blocks(ofLength bytesPerBlock: Int) -> FileHandleBlockIterator {
         return FileHandleBlockIterator(fileHandle: self, bytesPerBlock: bytesPerBlock)
     }
