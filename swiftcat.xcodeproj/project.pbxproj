@@ -11,7 +11,7 @@
 		4E9913101E6121E800DF725F /* CommandLineParseResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E99130F1E6121E800DF725F /* CommandLineParseResult.swift */; };
 		4E9913121E6126F400DF725F /* Array_appending.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913111E6126F400DF725F /* Array_appending.swift */; };
 		4E9913141E61273400DF725F /* String_substring_fromNumericIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913131E61273400DF725F /* String_substring_fromNumericIndex.swift */; };
-		4E9913161E612BE400DF725F /* FileHandle_Iterators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913151E612BE400DF725F /* FileHandle_Iterators.swift */; };
+		4E9913161E612BE400DF725F /* DataInputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913151E612BE400DF725F /* DataInputStream.swift */; };
 		4E9913181E6135AE00DF725F /* FileHandle_TextOutputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913171E6135AE00DF725F /* FileHandle_TextOutputStream.swift */; };
 		4E99131A1E61401200DF725F /* Data_convertNonPrintingCharacters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9913191E61401200DF725F /* Data_convertNonPrintingCharacters.swift */; };
 /* End PBXBuildFile section */
@@ -34,7 +34,7 @@
 		4E99130F1E6121E800DF725F /* CommandLineParseResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandLineParseResult.swift; sourceTree = "<group>"; };
 		4E9913111E6126F400DF725F /* Array_appending.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array_appending.swift; sourceTree = "<group>"; };
 		4E9913131E61273400DF725F /* String_substring_fromNumericIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String_substring_fromNumericIndex.swift; sourceTree = "<group>"; };
-		4E9913151E612BE400DF725F /* FileHandle_Iterators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileHandle_Iterators.swift; sourceTree = "<group>"; };
+		4E9913151E612BE400DF725F /* DataInputStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataInputStream.swift; sourceTree = "<group>"; };
 		4E9913171E6135AE00DF725F /* FileHandle_TextOutputStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileHandle_TextOutputStream.swift; sourceTree = "<group>"; };
 		4E9913191E61401200DF725F /* Data_convertNonPrintingCharacters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data_convertNonPrintingCharacters.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -72,7 +72,7 @@
 				4E9913111E6126F400DF725F /* Array_appending.swift */,
 				4E99130F1E6121E800DF725F /* CommandLineParseResult.swift */,
 				4E9913191E61401200DF725F /* Data_convertNonPrintingCharacters.swift */,
-				4E9913151E612BE400DF725F /* FileHandle_Iterators.swift */,
+				4E9913151E612BE400DF725F /* DataInputStream.swift */,
 				4E9913171E6135AE00DF725F /* FileHandle_TextOutputStream.swift */,
 				4E9913081E61208D00DF725F /* main.swift */,
 				4E9913131E61273400DF725F /* String_substring_fromNumericIndex.swift */,
@@ -145,7 +145,7 @@
 				4E9913181E6135AE00DF725F /* FileHandle_TextOutputStream.swift in Sources */,
 				4E99131A1E61401200DF725F /* Data_convertNonPrintingCharacters.swift in Sources */,
 				4E9913141E61273400DF725F /* String_substring_fromNumericIndex.swift in Sources */,
-				4E9913161E612BE400DF725F /* FileHandle_Iterators.swift in Sources */,
+				4E9913161E612BE400DF725F /* DataInputStream.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +277,7 @@
 				4E99130E1E61208D00DF725F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

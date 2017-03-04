@@ -5,7 +5,7 @@ swiftcat
 
 As such, it is no more useful than your system's built-in `cat`, but I did this as an exercise in writing some reusable Swift code for parsing command-line options and traversing files.
 
-It is mostly compatible with the built-in `cat`, so you can `alias cat=swiftcat` and be pretty happy with it. But `swiftcat` does not implement the `-s` or `-u` options, and its output of non-printing characters does not exactly match that of `cat`. It also currently does not support reading from standard input when a `-` is specified on the command line like `cat` does.
+It is mostly compatible with the built-in `cat`, so you can `alias cat=swiftcat` and be pretty happy with it. But `swiftcat` does not implement the `-s` or `-u` options, and its output of non-printing characters does not exactly match that of `cat`.
 
 Building swiftcat
 -----------------
@@ -17,9 +17,7 @@ In the `swiftcat` directory, you can type `xcodebuild` and the product will be b
 Running swiftcat
 ----------------
 
-Running `swiftcat` with no arguments will print a brief usage hint.
-
-Running `swiftcat -h` will display a summary of available command-line options:
+Running `swiftcat -h` will display a a usage hint and summary of available command-line options:
 
 ```
 usage: swiftcat [-behntvx] [file ...]
@@ -32,6 +30,8 @@ options:
 -v, --display-nonprinting      Display non-printing characters so they are visible.
 -x, --display-hex              Display non-printing characters in hexadecimal notation.
 ```
+
+As with `cat`, if a single dash (`-`) is specified as a filename, or if no arguments are given, then `swiftcat` reads from standard input.
 
 Use `man cat` for more information about what the options mean.
 

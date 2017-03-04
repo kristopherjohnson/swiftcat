@@ -9,8 +9,8 @@ import Foundation
 
 let bufferSize = 4 * 1024
 
-var stdout = FileHandle.standardOutput
-var stderr = FileHandle.standardError
+var standardOutput = FileHandle.standardOutput
+var standardError = FileHandle.standardError
 
 /// Errors that can be thrown by this application.
 enum AppError: Error, CustomStringConvertible {
@@ -27,36 +27,36 @@ enum AppError: Error, CustomStringConvertible {
 
 /// Display a brief usage message to standard error.
 func showUsage() {
-    print("usage: swiftcat [-behntvx] [file ...]", to: &stderr)
+    print("usage: swiftcat [-behntvx] [file ...]", to: &standardError)
 }
 
 /// Display information for command-line options to standard error.
 func showOptionsHelp(optionDefinitions: [CommandLineOptionDefinition]) {
-    print("options:", to: &stderr)
-    printHelp(optionDefinitions: optionDefinitions, to: &stderr, firstColumnWidth: 30)
+    print("options:", to: &standardError)
+    printHelp(optionDefinitions: optionDefinitions, to: &standardError, firstColumnWidth: 30)
 }
 
 /// Copy a file to standard output.
-func printFile(fileHandle: FileHandle) {
-    for data in fileHandle.blocks(ofLength: bufferSize) {
-        stdout.write(data)
+func printFile(inputStream: DataInputStream) {
+    for data in inputStream.blocks(ofLength: bufferSize) {
+        standardOutput.write(data)
     }
 }
 
 /// Copy a file to standard output, converting non-printing characters to visible forms.
-func printFile(fileHandle: FileHandle,
+func printFile(inputStream: DataInputStream,
                displayNonPrintingCharactersWithOptions options: NonPrintingCharacterConversionOptions) {
-    for data in fileHandle.blocks(ofLength: bufferSize) {
-        stdout.write(data.convertingNonPrintingCharacters(options: options))
+    for data in inputStream.blocks(ofLength: bufferSize) {
+        standardOutput.write(data.convertingNonPrintingCharacters(options: options))
     }
 }
 
 /// Copy a file to standard output, with line numbers.
-func printFileWithLineNumbers(fileHandle: FileHandle, skipBlankLines: Bool) {
+func printFileWithLineNumbers(inputStream: DataInputStream, skipBlankLines: Bool) {
     var nextLineNumber = 1
-    for lineData in fileHandle.lines() {
+    for lineData in inputStream.lines() {
         if skipBlankLines && isBlankLine(data: lineData) {
-            stdout.write(lineData)
+            standardOutput.write(lineData)
         }
         else {
             write(data: lineData, withLineNumber: nextLineNumber)
@@ -66,13 +66,13 @@ func printFileWithLineNumbers(fileHandle: FileHandle, skipBlankLines: Bool) {
 }
 
 /// Copy a file to standard output, with line numbers, converting non-printing characters to visible forms..
-func printFileWithLineNumbers(fileHandle: FileHandle,
+func printFileWithLineNumbers(inputStream: DataInputStream,
                               skipBlankLines: Bool,
                               displayNonPrintingCharactersWithOptions options: NonPrintingCharacterConversionOptions) {
     var nextLineNumber = 1
-    for lineData in fileHandle.lines() {
+    for lineData in inputStream.lines() {
         if skipBlankLines && isBlankLine(data: lineData) {
-            stdout.write(lineData)
+            standardOutput.write(lineData)
         }
         else {
             let data = lineData.convertingNonPrintingCharacters(options: options)
@@ -103,11 +103,27 @@ func isBlankLine(data: Data) -> Bool {
 func write(data: Data, withLineNumber lineNumber: Int) {
     let lineNumberString = String(format: "%6d  ", lineNumber)
     if let lineNumberData = lineNumberString.data(using: .utf8) {
-        stdout.write(lineNumberData)
-        stdout.write(data)
+        standardOutput.write(lineNumberData)
+        standardOutput.write(data)
     }
     else {
         fatalError("unable to convert string to UTF8")
+    }
+}
+
+func getInputStream(forPath path: String) throws -> DataInputStream {
+    if path == "-" {
+        let stream = StdioInputStream(file: stdin, name: "standard input")
+        if stream.isAtEOF {
+            stream.clearError()
+        }
+        return stream
+    }
+    else {
+        guard let fileHandle = FileHandle(forReadingAtPath: path) else {
+            throw AppError.unableToOpenFile(path: path)
+        }
+        return fileHandle
     }
 }
 
@@ -166,11 +182,6 @@ func main() {
             exit(0)
         }
 
-        if args.parsedArguments.count < 1 {
-            showUsage()
-            exit(1)
-        }
-
         var displayLineNumbers = false
         var skipBlankLines = false
         var displayNonPrintingCharacters = false
@@ -204,33 +215,34 @@ func main() {
             nonPrintingCharacterOptions.insert(.hex)
         }
 
-        for path in args.parsedArguments {
-            guard let fileHandle = FileHandle(forReadingAtPath: path) else {
-                throw AppError.unableToOpenFile(path: path)
-            }
+        // If no arguments provided, just read from standard input.
+        let paths = (args.parsedArguments.count > 0) ? args.parsedArguments : ["-"]
+
+        for path in paths {
+            let inputStream = try getInputStream(forPath: path)
 
             if displayLineNumbers {
                 if displayNonPrintingCharacters {
-                    printFileWithLineNumbers(fileHandle: fileHandle,
+                    printFileWithLineNumbers(inputStream: inputStream,
                                              skipBlankLines: skipBlankLines,
                                              displayNonPrintingCharactersWithOptions: nonPrintingCharacterOptions)
                 }
                 else {
-                    printFileWithLineNumbers(fileHandle: fileHandle,
+                    printFileWithLineNumbers(inputStream: inputStream,
                                              skipBlankLines: skipBlankLines)
                 }
             }
             else if displayNonPrintingCharacters {
-                printFile(fileHandle: fileHandle,
+                printFile(inputStream: inputStream,
                           displayNonPrintingCharactersWithOptions: nonPrintingCharacterOptions)
             }
             else {
-                printFile(fileHandle: fileHandle)
+                printFile(inputStream: inputStream)
             }
         }
     }
     catch let error {
-        print("swiftcat: \(error)", to: &stderr)
+        print("swiftcat: \(error)", to: &standardError)
         exit(1)
     }
 }
