@@ -10,11 +10,17 @@ import Foundation
 /// A `DataInputStream` implements a `readData(ofLength:)` method.
 public protocol DataInputStream {
     /// Synchronously reads data up to the specified number of bytes.
-    func readData(ofLength length: Int) -> Data
+    func readData(ofLength length: Int) throws -> Data
 }
 
 // FileHandle implements readData(ofLength:).
 extension FileHandle: DataInputStream { }
+
+/// Error that can be thrown by `StdioStream.readData(ofLength:)`.
+public struct StdioInputStreamReadError: Error {
+    public let name: String
+    public let errorCode: Int32
+}
 
 /// Adapts a C stdio `FILE*` as a `DataInputStream`.
 public class StdioInputStream: DataInputStream {
@@ -37,25 +43,21 @@ public class StdioInputStream: DataInputStream {
     /// Constructor
     ///
     /// - parameter file: Pointer to open FILE.
-    /// - parameter name: Label for the file, used in error messages.
+    /// - parameter name: Label for the file, used in thrown errors.
     public init(file: UnsafeMutablePointer<FILE>, name: String = "<unnamed file>") {
         self.file = file
         self.name = name
     }
 
     /// Synchronously reads data up to the specified number of bytes.
-    public func readData(ofLength length: Int) -> Data {
+    public func readData(ofLength length: Int) throws -> Data {
         var data = Data(count: length)
         let readCount = data.withUnsafeMutableBytes { (buffer) -> Int in
             return fread(buffer, 1, length, file)
         }
         if readCount < 1 {
-            // TODO: It's ugly to have this use of stderr here.
-            // Would be cleaner to provide some sort of error-handling
-            // delegate, or just treat errors as EOF.
             if error != 0 {
-                fputs("\(name): Read error", stderr)
-                clearError()
+                throw StdioInputStreamReadError(name: name, errorCode: error)
             }
             return Data()
         }
@@ -195,23 +197,28 @@ public struct DataInputStreamBlockIterator: IteratorProtocol, Sequence {
     ///
     /// - returns: `Data`, or `nil` if at end of file.
     public func next() -> Data? {
-        var block = dataInputStream.readData(ofLength: bytesPerBlock)
-        if block.count == bytesPerBlock {
-            return block
-        }
-        else if block.count == 0 {
-            return nil
-        }
-
-        // Keep reading until we fill the block or hit end-of-file.
-        var nextData = dataInputStream.readData(ofLength: bytesPerBlock - block.count)
-        while nextData.count > 0 {
-            block.append(nextData)
+        do {
+            var block = try dataInputStream.readData(ofLength: bytesPerBlock)
             if block.count == bytesPerBlock {
                 return block
             }
-            nextData = dataInputStream.readData(ofLength: bytesPerBlock - block.count)
+            else if block.count == 0 {
+                return nil
+            }
+
+            // Keep reading until we fill the block or hit end-of-file.
+            var nextData = try dataInputStream.readData(ofLength: bytesPerBlock - block.count)
+            while nextData.count > 0 {
+                block.append(nextData)
+                if block.count == bytesPerBlock {
+                    return block
+                }
+                nextData = try dataInputStream.readData(ofLength: bytesPerBlock - block.count)
+            }
+            return block
         }
-        return block
+        catch {
+            return nil
+        }
     }
 }
